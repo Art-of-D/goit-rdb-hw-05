@@ -1,0 +1,36 @@
+DROP FUNCTION IF EXISTS CalculateDivision;
+
+DELIMITER //
+
+CREATE FUNCTION CalculateDivision(inp_number1 FLOAT, inp_number2 FLOAT)
+RETURNS FLOAT
+DETERMINISTIC
+NO SQL
+BEGIN
+	DECLARE result FLOAT;
+    SET result = inp_number1 / inp_number2;
+    RETURN result;
+END //
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS PartToTotalProcedure;
+
+DELIMITER //
+CREATE PROCEDURE PartToTotalProcedure(order_number INT)
+READS SQL DATA
+BEGIN
+    DECLARE total_quantity FLOAT;
+    
+    SELECT SUM(quantity) INTO total_quantity
+    FROM order_details
+    WHERE order_id = order_number;
+    
+    SELECT order_id, CalculateDivision(quantity, total_quantity) AS part_to_total, total_quantity
+    FROM order_details
+    WHERE order_id = order_number;
+END //
+
+DELIMITER ;
+
+CALL PartToTotalProcedure(10400);
